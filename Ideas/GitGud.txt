@@ -1,0 +1,3 @@
+An model that detects everyday sounds (door closing, ruffling clothes, metal clangs, etc.)
+IDK where it can be used, maybe on an AR headset for the deaf?
+*shrugs*
