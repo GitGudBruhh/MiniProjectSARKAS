@@ -9,8 +9,8 @@ def playGame():
     gameHelper = GameHelper()
     while(1):
         noColours = int(input("Enter number of colours: "))
-        maxGuesses = int(input("Enter maximum number of guesses allowed: "))
         noSlots = int(input("Enter number of columns: "))
+        maxGuesses = int(input("Enter maximum number of guesses allowed: "))
         secretCode = gameHelper.createSecretCode(noColours, noSlots)
 
         newGameData = GameData(noColours, maxGuesses, noSlots, secretCode)
