@@ -1,9 +1,8 @@
 import copy
 
 class GameData:
-    noColours = None
-    maxGuesses = None
-    noSlots = None
+    NUM_COLORS = None
+    CODE_LENGTH = None
     secret_code = None
     POPULATION_SIZE=None
     NUM_GENERATIONS=None
