@@ -48,16 +48,30 @@ from concurrent.futures import ProcessPoolExecutor
 # Main genetic algorithm with parallel fitness calculation
 def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGenerations, mutationRate, maxWorkers):
     population = [gameHelper.generate_random_code(numColors,codeLength) for _ in range(populationSize)]
+    Guess_List = []
+    
 
     with ProcessPoolExecutor(max_workers=maxWorkers) as executor:
-        Guess_List = [[1,1,2,2]]
         
+        '''
+        while(True): 
+            playerGuessStr = input("Enter first guess: ")
+            playerFirstGuess =[int(color) for color in playerGuessStr.split(" ")]
+            if gameHelper.isValidGuess(newGameData, playerFirstGuess) == True:
+                Guess_List.append(playerFirstGuess)
+                break
+        '''        
+        
+        Guess_List = [gameHelper.generate_random_code(numColors,codeLength)]
+        print("Initial Guess:",Guess_List[0])
+
         for generation in range(numGenerations):
             # Parallel calculation of fitness
             #print(Guess_List)
             t=[]
-            total_dist=0
+           
             for individual in population:
+                total_dist=0
                 for c_i in Guess_List:
                     args = (individual, c_i,codeLength,numColors) 
                     h = gameHelper.hint(args)
@@ -70,28 +84,61 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
             population_with_fitness = list(zip(executor.map(gameHelper.calculate_fitness, t), population))
 
             population_with_fitness.sort()
+
             
-            if any(fitness == 0 for fitness, _ in population_with_fitness):
+            
+            if population_with_fitness[-1][0] == 0 and population_with_fitness[-1][1] not in Guess_List :
                 Guess_List.append(population_with_fitness[-1][1])
 
 
             print(Guess_List)
             if gameHelper.hint((Guess_List[-1],secret_code,codeLength,numColors))[0] == codeLength:
-                #solution = [individual for individual, fitness in population_with_fitness if fitness == codeLength * 2][0]
+               
                 print(f"Solution found in generation {generation}: {Guess_List[-1]}")
                 return Guess_List[-1]
 
 
-            parents = gameHelper.select_parents(population_with_fitness)
-            half = len(population)//2
+           
+
+            
+            half = populationSize//2
+            
+
             
             population = [code for _ , code in population_with_fitness[half:]]
-            while len(population) < populationSize:
-                parent1, parent2 = random.sample(parents, 2)
-                offspring1, offspring2 = gameHelper.crossover(parent1[0], parent2[0],codeLength)
-                population.append(gameHelper.mutate(offspring1, mutationRate, codeLength, numColors))
-                if len(population) < populationSize:
-                    population.append(gameHelper.mutate(offspring2, mutationRate, codeLength, numColors))
+            transposition_size = int(0.2* len(population)) #1
+            crossover_size = int(0.4* len(population)) #2 
+            c_mutate_size = len(population) - transposition_size - crossover_size #2
+            
+            transposition_set = random.sample(population, transposition_size)
+            co_set = random.sample(population, crossover_size)
+            cm_set = random.sample(population, c_mutate_size)
+            #print("before:",len(population))
+            i = 0 
+            while i < transposition_size:
+                population.append(gameHelper.transpose(transposition_set[i]))
+                #print(c)
+                i+=1
+            #print(len(population))
+            i = 0
+            while i < (crossover_size):
+                parent1, parent2 = random.sample(co_set, 2)
+                offspring1, offspring2 = gameHelper.crossover(parent1, parent2,codeLength)
+                population.append(offspring1)
+                i+=1
+                if i < crossover_size:
+                    population.append(offspring2)
+                i+=1
+            
+            #print(len(population))
+            i = 0
+            while i  < (c_mutate_size):
+                population.append(gameHelper.circular_mutate(cm_set[i]))
+                i+=1
+
+            #print("\n")
+            #print((population))
+            #print("\n")
 
     print("Solution not found within the generation limit.")
     return None
@@ -103,13 +150,13 @@ if __name__ == "__main__":
     CODE_LENGTH = int(input("Enter number of columns: "))
     POPULATION_SIZE = int(input("Enter size of population: "))
     NUM_GENERATIONS = int(input("Enter number of generations: "))
-    MUTATION_RATE = float(input("Enter mutation rate: "))
+    #MUTATION_RATE = float(input("Enter mutation rate: "))
     gameHelper=GameHelper()
     secret_code=gameHelper.generate_random_code(NUM_COLORS,CODE_LENGTH)
-    newGameData = GameData(NUM_COLORS, POPULATION_SIZE, CODE_LENGTH, secret_code, NUM_GENERATIONS, MUTATION_RATE)
+    newGameData = GameData(NUM_COLORS, POPULATION_SIZE, CODE_LENGTH, secret_code, NUM_GENERATIONS, 0)
     MAX_WORKERS = 4  # Number of processes to use for parallel execution
     print(f"Secret Code: {secret_code}")
-    solution = genetic_algorithm(secret_code, NUM_COLORS, CODE_LENGTH, POPULATION_SIZE, NUM_GENERATIONS, MUTATION_RATE, MAX_WORKERS)
+    solution = genetic_algorithm(secret_code, NUM_COLORS, CODE_LENGTH, POPULATION_SIZE, NUM_GENERATIONS, 0, MAX_WORKERS)
     if solution:
         print(f"Found Solution: {solution}")
     else:
