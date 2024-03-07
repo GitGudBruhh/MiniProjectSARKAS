@@ -46,12 +46,19 @@ from concurrent.futures import ProcessPoolExecutor
 #     return None
 
 # Main genetic algorithm with parallel fitness calculation
+# def calculate_dynamic_mutation_rate(initial_rate, current_generation, total_generations):
+#     # Example: Linearly decrease the mutation rate from initial_rate to 0 over total_generations
+#     return max(0, initial_rate - (initial_rate / total_generations) * current_generation)
+
+
 def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGenerations, mutationRate, maxWorkers):
     population = [gameHelper.generate_random_code(numColors,codeLength) for _ in range(populationSize)]
 
     with ProcessPoolExecutor(max_workers=maxWorkers) as executor:
         for generation in range(numGenerations):
             # Parallel calculation of fitness
+            # mutationRate = calculate_dynamic_mutation_rate(mutationRate, generation, numGenerations)
+
             args = [(individual, secret_code,codeLength,numColors) for individual in population]
 
 
