@@ -47,14 +47,17 @@ import copy
 #     return None
 
 # Main genetic algorithm with parallel fitness calculation
-def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGenerations, mutationRate, maxWorkers):
-    with ProcessPoolExecutor(max_workers=maxWorkers) as executor:
+def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGenerations, mutationRate):
         while(True):
-        
-        
+            #Generating random population
             population = [gameHelper.generate_random_code(numColors,codeLength) for _ in range(populationSize)]
+
+            #Empty Guess List
             Guess_List = []
+            
             '''
+            For choosing custom initial guess
+
             while(True): 
                 playerGuessStr = input("Enter first guess: ")
                 playerFirstGuess =[int(color) for color in playerGuessStr.split(" ")]
@@ -62,15 +65,16 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
                     Guess_List.append(playerFirstGuess)
                     break
             '''
+
+            # Generating Random initaial guess
             Guess_List = [gameHelper.generate_random_code(numColors,codeLength)]
             print("Initial Guess:",Guess_List[0])
             
-
-            for generation in range(numGenerations):
-                # Parallel calculation of fitness
+            #Starting at generation 0
+            for generation in range(numGenerations): 
+                t=[] # list to store fitnesses for each element in population
                 
-                t=[]
-            
+                #Calculating fitness for each element in population
                 for individual in population:
                     total_dist=0
                     for c_i in Guess_List:
@@ -79,49 +83,51 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
                         args_g = (c_i, secret_code,codeLength,numColors)
                         h_i = gameHelper.hint(args_g)
                         total_dist +=  gameHelper.distance(h,h_i)
-                    
                     t.append(total_dist)
-                        
-                population_with_fitness = list(zip(executor.map(gameHelper.calculate_fitness, t), population))
 
+                #List containing (fitness,element)        
+                population_with_fitness = list(zip(map(gameHelper.calculate_fitness, t), population))
+
+                #Sorting from least to greatest fitness
                 population_with_fitness.sort()
-                #print("population_with_fitness before:",population_with_fitness)
-                #print('\n')
-
+                
+                #Checking whether there is an element with fitness 0 (a consistent element) and chossing it as a guess
                 if population_with_fitness[-1][0] == 0 and population_with_fitness[-1][1] not in Guess_List :
                     Guess_List.append(copy.deepcopy(population_with_fitness[-1][1]))
 
-                
+                print(Guess_List) #Displaying guesses in each generation
 
-                print(Guess_List)
-                #print("\n")
+                #Checking if secret code obtained (ie last elemnt of guess list is secret code)
                 if gameHelper.hint((Guess_List[-1],secret_code,codeLength,numColors))[0] == codeLength:
-                
                     print(f"Solution found in generation {generation}: {Guess_List[-1]}")
                     return Guess_List[-1]
 
                 
+                half = populationSize//2 
                 
-                half = populationSize//2
-                
-
-                
+                # Storing the half of the original population with lower fitness in the new population
                 population = [code for _ , code in copy.deepcopy(population_with_fitness)[half:]]
+                # 20% of the (new) population to be transposed
                 transposition_size = int(0.2* len(population)) #1
+                # 40% of the (new) population to be crossed-over
                 crossover_size = int(0.4* len(population)) #2 
+                # 40% of the (new) population to be circular mutated
                 c_mutate_size = len(population) - transposition_size - crossover_size #2
                 
+                #Set to be transposed
                 transposition_set = random.sample(copy.deepcopy(population), transposition_size)
+                #Set to be crossed-over
                 co_set = random.sample(copy.deepcopy(population), crossover_size)
+                #Set to be circular mutated
                 cm_set = random.sample(copy.deepcopy(population), c_mutate_size)
-                #print("before:",len(population))
+               
+                #Applying transposition on elements in transposition set at adding them to population 
                 i = 0 
                 while i < transposition_size:
                     population.append(gameHelper.transpose(transposition_set[i]))
                     i+=1
                
-    
-                #print(len(population))
+                #Applying crossover on elements in crossover set at adding them to population
                 i = 0
                 while i < (crossover_size):
                     parent1, parent2 = random.sample(co_set, 2)
@@ -132,17 +138,14 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
                         population.append(offspring2)
                     i+=1
                 
-                
-                #print(len(population))
+                #Applying circular mutation on elements in circular mutation set at adding them to population
                 i = 0
                 while i  < (c_mutate_size):
                     population.append(gameHelper.circular_mutate(cm_set[i]))
                     i+=1
                 
 
-                #print("population after:",population)
-                #print('\n')
-                
+            #Case when generation is insufficient to obtain secret code restart    
             print("Solution not found within the generation limit.")
             n = input("Try Again?(y/n)")
             if n == 'n':
@@ -150,8 +153,7 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
 
         #return None
 
-# Example
-# secret_code = generate_random_code()
+
 if __name__ == "__main__":
     NUM_COLORS = int(input("Enter number of colours: "))
     CODE_LENGTH = int(input("Enter number of columns: "))
@@ -161,9 +163,8 @@ if __name__ == "__main__":
     gameHelper=GameHelper()
     secret_code=gameHelper.generate_random_code(NUM_COLORS,CODE_LENGTH)
     newGameData = GameData(NUM_COLORS, POPULATION_SIZE, CODE_LENGTH, secret_code, NUM_GENERATIONS, 0)
-    MAX_WORKERS = 4  # Number of processes to use for parallel execution
     print(f"Secret Code: {secret_code}")
-    solution = genetic_algorithm(secret_code, NUM_COLORS, CODE_LENGTH, POPULATION_SIZE, NUM_GENERATIONS, 0, MAX_WORKERS)
+    solution = genetic_algorithm(secret_code, NUM_COLORS, CODE_LENGTH, POPULATION_SIZE, NUM_GENERATIONS, 0)
     if solution:
         print(f"Found Solution: {solution}")
     else:
