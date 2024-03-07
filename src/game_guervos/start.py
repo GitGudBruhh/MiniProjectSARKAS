@@ -2,6 +2,7 @@ import random
 from GameData import GameData
 from GameHelper import GameHelper
 from concurrent.futures import ProcessPoolExecutor
+import copy
 
 # Constants for the game
 # CODE_LENGTH = 6  # Length of the secret code
@@ -47,101 +48,107 @@ from concurrent.futures import ProcessPoolExecutor
 
 # Main genetic algorithm with parallel fitness calculation
 def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGenerations, mutationRate, maxWorkers):
-    population = [gameHelper.generate_random_code(numColors,codeLength) for _ in range(populationSize)]
-    Guess_List = []
-    
-
     with ProcessPoolExecutor(max_workers=maxWorkers) as executor:
+        while(True):
         
-        '''
-        while(True): 
-            playerGuessStr = input("Enter first guess: ")
-            playerFirstGuess =[int(color) for color in playerGuessStr.split(" ")]
-            if gameHelper.isValidGuess(newGameData, playerFirstGuess) == True:
-                Guess_List.append(playerFirstGuess)
-                break
-        '''        
         
-        Guess_List = [gameHelper.generate_random_code(numColors,codeLength)]
-        print("Initial Guess:",Guess_List[0])
+            population = [gameHelper.generate_random_code(numColors,codeLength) for _ in range(populationSize)]
+            Guess_List = []
+            '''
+            while(True): 
+                playerGuessStr = input("Enter first guess: ")
+                playerFirstGuess =[int(color) for color in playerGuessStr.split(" ")]
+                if gameHelper.isValidGuess(newGameData, playerFirstGuess) == True:
+                    Guess_List.append(playerFirstGuess)
+                    break
+            '''
+            Guess_List = [gameHelper.generate_random_code(numColors,codeLength)]
+            print("Initial Guess:",Guess_List[0])
+            
 
-        for generation in range(numGenerations):
-            # Parallel calculation of fitness
-            #print(Guess_List)
-            t=[]
-           
-            for individual in population:
-                total_dist=0
-                for c_i in Guess_List:
-                    args = (individual, c_i,codeLength,numColors) 
-                    h = gameHelper.hint(args)
-                    args_g = (c_i, secret_code,codeLength,numColors)
-                    h_i = gameHelper.hint(args_g)
-                    total_dist +=  gameHelper.distance(h,h_i)
+            for generation in range(numGenerations):
+                # Parallel calculation of fitness
                 
-                t.append((total_dist))
+                t=[]
+            
+                for individual in population:
+                    total_dist=0
+                    for c_i in Guess_List:
+                        args = (individual, c_i,codeLength,numColors) 
+                        h = gameHelper.hint(args)
+                        args_g = (c_i, secret_code,codeLength,numColors)
+                        h_i = gameHelper.hint(args_g)
+                        total_dist +=  gameHelper.distance(h,h_i)
                     
-            population_with_fitness = list(zip(executor.map(gameHelper.calculate_fitness, t), population))
+                    t.append(total_dist)
+                        
+                population_with_fitness = list(zip(executor.map(gameHelper.calculate_fitness, t), population))
 
-            population_with_fitness.sort()
+                population_with_fitness.sort()
+                #print("population_with_fitness before:",population_with_fitness)
+                #print('\n')
 
-            
-            
-            if population_with_fitness[-1][0] == 0 and population_with_fitness[-1][1] not in Guess_List :
-                Guess_List.append(population_with_fitness[-1][1])
+                if population_with_fitness[-1][0] == 0 and population_with_fitness[-1][1] not in Guess_List :
+                    Guess_List.append(copy.deepcopy(population_with_fitness[-1][1]))
 
+                
 
-            print(Guess_List)
-            if gameHelper.hint((Guess_List[-1],secret_code,codeLength,numColors))[0] == codeLength:
+                print(Guess_List)
+                #print("\n")
+                if gameHelper.hint((Guess_List[-1],secret_code,codeLength,numColors))[0] == codeLength:
+                
+                    print(f"Solution found in generation {generation}: {Guess_List[-1]}")
+                    return Guess_List[-1]
+
+                
+                
+                half = populationSize//2
+                
+
+                
+                population = [code for _ , code in copy.deepcopy(population_with_fitness)[half:]]
+                transposition_size = int(0.2* len(population)) #1
+                crossover_size = int(0.4* len(population)) #2 
+                c_mutate_size = len(population) - transposition_size - crossover_size #2
+                
+                transposition_set = random.sample(copy.deepcopy(population), transposition_size)
+                co_set = random.sample(copy.deepcopy(population), crossover_size)
+                cm_set = random.sample(copy.deepcopy(population), c_mutate_size)
+                #print("before:",len(population))
+                i = 0 
+                while i < transposition_size:
+                    population.append(gameHelper.transpose(transposition_set[i]))
+                    i+=1
                
-                print(f"Solution found in generation {generation}: {Guess_List[-1]}")
-                return Guess_List[-1]
+    
+                #print(len(population))
+                i = 0
+                while i < (crossover_size):
+                    parent1, parent2 = random.sample(co_set, 2)
+                    offspring1, offspring2 = gameHelper.crossover(parent1, parent2,codeLength)
+                    population.append(offspring1)
+                    i+=1
+                    if i < crossover_size:
+                        population.append(offspring2)
+                    i+=1
+                
+                
+                #print(len(population))
+                i = 0
+                while i  < (c_mutate_size):
+                    population.append(gameHelper.circular_mutate(cm_set[i]))
+                    i+=1
+                
 
+                #print("population after:",population)
+                #print('\n')
+                
+            print("Solution not found within the generation limit.")
+            n = input("Try Again?(y/n)")
+            if n == 'n':
+                break
 
-           
-
-            
-            half = populationSize//2
-            
-
-            
-            population = [code for _ , code in population_with_fitness[half:]]
-            transposition_size = int(0.2* len(population)) #1
-            crossover_size = int(0.4* len(population)) #2 
-            c_mutate_size = len(population) - transposition_size - crossover_size #2
-            
-            transposition_set = random.sample(population, transposition_size)
-            co_set = random.sample(population, crossover_size)
-            cm_set = random.sample(population, c_mutate_size)
-            #print("before:",len(population))
-            i = 0 
-            while i < transposition_size:
-                population.append(gameHelper.transpose(transposition_set[i]))
-                #print(c)
-                i+=1
-            #print(len(population))
-            i = 0
-            while i < (crossover_size):
-                parent1, parent2 = random.sample(co_set, 2)
-                offspring1, offspring2 = gameHelper.crossover(parent1, parent2,codeLength)
-                population.append(offspring1)
-                i+=1
-                if i < crossover_size:
-                    population.append(offspring2)
-                i+=1
-            
-            #print(len(population))
-            i = 0
-            while i  < (c_mutate_size):
-                population.append(gameHelper.circular_mutate(cm_set[i]))
-                i+=1
-
-            #print("\n")
-            #print((population))
-            #print("\n")
-
-    print("Solution not found within the generation limit.")
-    return None
+        #return None
 
 # Example
 # secret_code = generate_random_code()
