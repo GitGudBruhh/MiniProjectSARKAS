@@ -1,7 +1,7 @@
 import random
 from GameData import GameData
 from GameHelper import GameHelper
-from concurrent.futures import ProcessPoolExecutor
+# from concurrent.futures import ProcessPoolExecutor
 import copy
 
 # Constants for the game
@@ -75,6 +75,8 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
                 t=[] # list to store fitnesses for each element in population
                 
                 #Calculating fitness for each element in population
+                #Individual - Candidate
+                #c_i - Guess
                 for individual in population:
                     total_dist=0
                     for c_i in Guess_List:
