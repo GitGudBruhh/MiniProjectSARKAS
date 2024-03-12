@@ -69,17 +69,17 @@ import copy
 
 # Main genetic algorithm with parallel fitness calculation
 def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGenerations, mutationRate, permutationRate, inversionRate):
-    i=1
+    i=0
     gameHelper = GameHelper()
     Intial_Guess=[1,1,2,3]
     args=(Intial_Guess,secret_code,codeLength,numColors)
     pegs=gameHelper.hint(args)
     print("Initial Guess:",[1,1,2,3])
+    Guess_List = [[1,1,2,3]]
     while(pegs[0]!=codeLength):
         i+=1 
         h=1
         Eligible_set=[]
-        Guess_List = [[1,1,2,3]]
         #Generating random population
         population = [gameHelper.generate_random_code(numColors,codeLength) for _ in range(populationSize)]
 
@@ -115,24 +115,26 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
                     h1 = gameHelper.hint(args)
                     args_g = (c_i, secret_code,codeLength,numColors)
                     h_i = gameHelper.hint(args_g)
-                    total_dist +=  gameHelper.distance(h1,h_i,i,codeLength)
+                    total_dist +=  gameHelper.distance(h1,h_i,len(Guess_List),codeLength)
                 t.append(total_dist)
 
             #List containing (fitness,element)        
             population_with_fitness = list(zip(map(gameHelper.calculate_fitness, t), population))
             population_with_fitness.sort()
-
-            if population_with_fitness[-1][0] == 0 and population_with_fitness[-1][1] not in Eligible_set :
-                Eligible_set.append(copy.deepcopy(population_with_fitness[-1][1]))
+            print("Pop with fit:",population_with_fitness)
+            #print(2*codeLength*(len(Guess_List)-1))
+            for k in range(len(population_with_fitness)):
+                if len(Eligible_set)>=populationSize:
+                    break
+                if population_with_fitness[k][0] == 2*codeLength*(len(Guess_List)-1) and population_with_fitness[k][1] not in Eligible_set :
+                    Eligible_set.append(copy.deepcopy(population_with_fitness[k][1]))
             
-            if len(Eligible_set) >= populationSize:
-                break
-
             h+=1
-
+        print("ES:",Eligible_set)
         Random_Guess=random.choice(Eligible_set)
         #print(Random_Guess)
-        Guess_List.append(Random_Guess)
+        Guess_List.append(copy.deepcopy(Random_Guess))
+        print("GL:",Guess_List)
         a=(Random_Guess,secret_code,codeLength,numColors)
         pegs=gameHelper.hint(a)
 

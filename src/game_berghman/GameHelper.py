@@ -30,8 +30,8 @@ class GameHelper:
         return [black_pegs,white_pegs]
 
     def distance(self,peg_list1,peg_list2,guess,CODE_LENGTH):
-        #d = abs(peg_list1[0]-peg_list2[0])+abs(peg_list1[1]-peg_list2[1]) - 2*CODE_LENGTH*(guess-1)
-        d = abs(peg_list1[0]-peg_list2[0])+abs(peg_list1[1]-peg_list2[1])
+        d = abs(peg_list1[0]-peg_list2[0])+abs(peg_list1[1]-peg_list2[1]) - 2*CODE_LENGTH*(guess-1)
+        #d = abs(peg_list1[0]-peg_list2[0])+abs(peg_list1[1]-peg_list2[1])
         return d
 
     def calculate_fitness(self,args):
