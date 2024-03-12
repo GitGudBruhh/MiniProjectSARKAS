@@ -32,13 +32,13 @@ class GameData:
 
     def getPopSize(self):
         return self.POPULATION_SIZE
-    
+
     def getNumGen(self):
         return self.NUM_GENERATIONS
-    
+
     def getMutRate(self):
         return self.MUTATION_RATE
-    
+
     def getPerRate(self):
         return self.PERMUTATION_RATE
 
@@ -54,16 +54,16 @@ class GameData:
 
     def setNoColours(self, NUM_COLORS: int):
         self.NUM_COLORS = NUM_COLORS
-        
+
     def setPopSize(self, POPULATION_SIZE: int):
         self.POPULATION_SIZE=POPULATION_SIZE
-    
+
     def setNumGen(self, NUM_GENERATIONS: int):
         self.NUM_GENERATIONS=NUM_GENERATIONS
 
     def setMutRate(self, MUTATION_RATE: float):
         self.MUTATION_RATE= MUTATION_RATE
-    
+
     def setPerRate(self, PERMUTATION_RATE: float):
         self.PERMUTATION_RATE = PERMUTATION_RATE
 
@@ -75,3 +75,5 @@ class GameData:
 
     def setSecretCode(self, secret_code: list[str]):
         self.secret_code = secret_code
+
+
