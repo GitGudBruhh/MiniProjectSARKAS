@@ -7,8 +7,8 @@ class GameHelper:
 
     def generate_random_code(self, NUM_COLORS: int, CODE_LENGTH: int):
         return [random.randint(1, NUM_COLORS) for _ in range(CODE_LENGTH)]
-    
-    
+
+
     def isValidGuess(self, gameData: GameData, playerGuess: list[str]):
         if not (len(playerGuess) == gameData.getNoSlots()):
             print("Length of guess not equal to number of slots")
@@ -27,19 +27,27 @@ class GameHelper:
         code, secret_code, CODE_LENGTH, NUM_COLORS = args
         black_pegs = sum(1 for i in range(CODE_LENGTH) if code[i] == secret_code[i])
         white_pegs = sum(min(code.count(j), secret_code.count(j)) for j in range(1, NUM_COLORS + 1)) - black_pegs
-        return [black_pegs,white_pegs]
+        return [black_pegs, white_pegs]
 
     def distance(self,peg_list1,peg_list2,guess,CODE_LENGTH):
         d = abs(peg_list1[0]-peg_list2[0])+abs(peg_list1[1]-peg_list2[1]) - 2*CODE_LENGTH*(guess-1)
         #d = abs(peg_list1[0]-peg_list2[0])+abs(peg_list1[1]-peg_list2[1])
         return d
 
-    def calculate_fitness(self,args):
-        total_dist = args
-        fitness = -total_dist
+    def calculate_fitness(self, code, history, a, b, P):
+        fitness = 0
+        for i, (guess, (black_pins, white_pins)) in enumerate(history, 1):
+            # Calculate Xq(c) and Yq(c)
+            temp_black_pins = sum([1 for x, y in zip(code, guess) if x == y])
+            temp_white_pins = sum([1 for x in code if x in guess]) - temp_black_pins
+
+            # Apply the fitness formula
+            fitness += a * abs(temp_black_pins - black_pins) + abs(temp_white_pins - white_pins)
+
+        # Add the additional term based on the iteration and code length
+        fitness += b * P * (i - 1)
+
         return fitness
-        
-        
 
     def select_parents(self, population_with_fitness):
         weighted_choices = [(individual, fitness) for fitness, individual in population_with_fitness]
@@ -55,13 +63,13 @@ class GameHelper:
         child1 = parent1[:crossover_points[0]] + parent2[crossover_points[0]:crossover_points[1]] + parent1[crossover_points[1]:]
         child2 = parent2[:crossover_points[0]] + parent1[crossover_points[0]:crossover_points[1]] + parent2[crossover_points[1]:]
         return child1, child2
-        
+
     def circular_mutate(self,code):
         new_code = []
         new_code.append(code[-1])
         new_code = new_code + code[:-1]
         return new_code
-    
+
     def transpose(self,code):
         new_code = code
         tc_index = random.randint(0, len(code) - 1)
@@ -91,3 +99,5 @@ class GameHelper:
             start, end = min(pos1, pos2), max(pos1, pos2)
             code[start:end+1] = reversed(code[start:end+1])
         return code
+
+
