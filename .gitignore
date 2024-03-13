@@ -4,3 +4,6 @@ Ideas/mastermind.log
 Ideas/mastermind.out
 Ideas/mastermind.synctex.gz
 Ideas/mastermind.tex
+pyenv/
+src/fuzzy_hash/ssdeep-2.14.1
+src/fuzzy_hash/tlsh-master

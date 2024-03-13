@@ -158,7 +158,7 @@ for color in colors:
 
 plt.plot(colors,Avg_guess)
 plt.xlabel("Color Count")
-plt.ylabel("Average Guesses")
+plt.ylabel("Average Guesses (4 slots)")
 plt.show()
 
 X=np.array([[color,1] for color in colors])
@@ -169,7 +169,11 @@ plt.scatter(colors,Avg_comb)
 C = np.linspace(5,10,10)
 eq = "y = " + str(np.round(w[0],2)) + "x" + " + " + "("+str(np.round(w[1],2))+")"
 plt.plot(C,C*w[0]+w[1])
-plt.title(eq)
+# plt.title("Average combinations for 4 slots, x colours")
+plt.suptitle(eq)
 plt.xlabel("Color Count")
-plt.ylabel("Average Combinations evaluated")
+plt.ylabel("Average Combinations evaluated (4 slots)")
 plt.show()
+
+print(Avg_guess)
+print(Avg_comb)

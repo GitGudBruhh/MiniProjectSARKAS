@@ -34,7 +34,7 @@ def playGame():
         # Setting up the variables for our 'mastermind'
         all_combinations = GameHelper.initialize_possible_answers(noColours, noSlots)
         possible_answers = all_combinations.copy()
-        guess = (1, 1, 1, 1)  # Knuth's initial guess
+        guess = (1, 1, 2, 2)  # Knuth's initial guess
         attempts = 0
         while(1):
             # if attempts == maxGuesses:
