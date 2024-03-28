@@ -1,8 +1,8 @@
 import random
 
-def normalize(string):
+def normalize(string,slots):
     # Initialize an array with 4 rows and the length of the string columns, all elements set to 0
-    array = [[0 for _ in range(len(string))] for _ in range(4)]
+    array = [[0 for _ in range(len(string))] for _ in range(slots)]
     
     i = 0
     while i < len(string):
@@ -19,7 +19,7 @@ length = 10
 new_str = ''.join(random.choices(my_str, k=length))
 
 print(new_str)
-result_array = normalize(new_str)
+result_array = normalize(new_str,4)
 print("Array:")
 for row in result_array:
     print(row)
