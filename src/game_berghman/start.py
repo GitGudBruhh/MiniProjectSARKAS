@@ -66,14 +66,14 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
         if len(Eligible_set)<=3:
             Eligible_set = set(list(previous_set) +list(Eligible_set))
         previous_set = Eligible_set
-        print("PS:",previous_set)
+        # print("PS:",previous_set)
         Random_Guess = random.choice(list(Eligible_set))
 
         if ([Random_Guess, tuple(gameHelper.hint((Random_Guess, secret_code, codeLength, numColors)))] not in Guess_List):
             Guess_List.append(
                 copy.deepcopy([Random_Guess, tuple(gameHelper.hint((Random_Guess, secret_code, codeLength, numColors)))]))
         
-        print("GL:", Guess_List)
+        # print("GL:", Guess_List)
         a = (Random_Guess, secret_code, codeLength, numColors)
         pegs = gameHelper.hint(a)
         Eligible_set = set()
@@ -81,7 +81,8 @@ def genetic_algorithm(secret_code, numColors, codeLength, populationSize, numGen
     if pegs[0]==codeLength:
         print(f"Solution found: {Guess_List[-1]}")
         print("Number of Guesses:", len(Guess_List))
-    print("Did not find solution")
+    else:
+        print("Did not find solution")
     return Guess_List[-1]
 
 
