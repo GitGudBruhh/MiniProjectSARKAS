@@ -48,6 +48,22 @@ class GameHelper:
         fitness += b * P * (i - 1)
 
         return fitness
+    # def calculate_fitness(self, code, history, a, b, P):
+    #     if not history:
+    #         return float('inf')  # Return a large value if history is empty
+    #     fitness = 0
+    #     for i, (guess, (black_pins, white_pins)) in enumerate(history, 1):
+    #         # Calculate Xq(c) and Yq(c)
+    #         temp_black_pins = sum([1 for x, y in zip(code, guess) if x == y])
+    #         temp_white_pins = sum([1 for x in code if x in guess]) - temp_black_pins
+
+    #         # Apply the fitness formula
+    #         fitness += a * abs(temp_black_pins - black_pins) + abs(temp_white_pins - white_pins)
+
+    #     # Add the additional term based on the iteration and code length
+    #     fitness += b * P * (i - 1)
+
+    #     return fitness
 
     def select_parents(self, population_with_fitness):
         weighted_choices = [(individual, fitness) for fitness, individual in population_with_fitness]
