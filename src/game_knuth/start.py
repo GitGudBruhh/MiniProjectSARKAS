@@ -71,7 +71,7 @@ def playGame():
             #print(newGameState.getScore(), "\n\n")
 
             # newGameState.displayAllGrid()
-            time.sleep(2)
+            # time.sleep(2)
 
 
 

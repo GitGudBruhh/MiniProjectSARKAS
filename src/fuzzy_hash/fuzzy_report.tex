@@ -1,0 +1,29 @@
+\documentclass[]{article}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usetikzlibrary{arrows}
+
+%opening
+\begin{document}
+	\section{Fuzzy Hashing}
+		A closer look into the algorithms implemented, and Mastermind itself, show that this problem is essentially an informed search problem where the search space can be imagined to be a set of strings. Looking into practical aspects of these solutions, we come to the realm of cryptography, where reversing a hash to its parent string has some similarities to the problem at hand. The classical hash algorithms (such as MD5, SHA, etc.) follow the avalanche effect where a small change in the input parent string causes a large change in the hash. Moreover, there is no notion of 'similarity' in the hashes provided by such algorithms.
+		
+		In this report, we restrict ourselves to a special set of cryptographic hash algorithms called fuzzy hash algorithms, which provide similar hashes for similar inputs, and included is a notion of a 'similarity score' or a 'difference score'.
+		Formalizing the problem, we can state it as follows:
+		\begin{description}
+			\item[Q.] Given a fuzzy hashing function $F$, a difference function $D_F$, and a hash of a string $h$, can we find a string $s$ such that $F(s) = h$?
+		\end{description}
+		
+		\subsection{Proof of Concept}
+		
+		In our approach we model this problem using the TLSH hash algorithm and its difference function, and a string length fixed at 50.  \textbf{Closeness} $c_{ij}$ of two \textit{known} strings $w_i, w_j$ is measured by the number of character matches when compared index wise, and if a string is unknown, but the hashes are known then the difference function $D_F(h_i, h_j)$ is used to get a \textbf{difference score} to compare them.
+		
+		To pick the inital parent strings, we use a premade random string-hash database. Given a hash $h$ of a secret string $s$, we pick a set $S_0$ of strings from the database which have a difference score with $s$ less than a certain threshold $\tau$. Ranking the elements of $S_0 \times S_0$, highest closeness first, we cross the parents in 'chunks' where they have varying characters. The resulting progeny are then ranked based on the \textit{decrease} in the difference score with $s$ (i.e. higest similarity first). Choosing the fittest $N$ progeny as set $S_1$, the process is then repeated. This continues iteratively until convergence of difference scores.
+		
+		\subsection{Observation}
+			For a single iteration of this algorithm with threshold $\tau = 70$, we see that on average there are a significant number $(\approx 100)$ of child strings that have an improvement of at least a difference score of 10. Iteration is expected to further reduce the difference scores with increasing number of generations.
+\end{document}
